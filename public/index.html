@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CareerMind AI - Resume Intelligence & Career Prediction Platform</title>
+  <!-- SEO Metadata -->
+  <meta name="description" content="Evaluate employability, predict career readiness, identify skill gaps, estimate interview performance, and optimize resumes with CareerMind AI.">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Background Glow FX -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h1>CareerMind <span>AI</span></h1>
+      </div>
+      
+      <div class="header-actions">
+        <div class="model-select-wrapper">
+          <label for="modelSelect">AI Model:</label>
+          <select id="modelSelect" class="styled-select">
+            <option value="gemini-3.5-flash" selected>Gemini 3.5 Flash</option>
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+            <option value="gemini-3.1-pro">Gemini 3.1 Pro</option>
+            <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+          </select>
+        </div>
+        
+        <button id="btnSettings" class="btn btn-secondary flex-btn" aria-label="Open Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          API Settings
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Work Area -->
+  <main class="main-content">
+    
+    <!-- SECTION 1: Upload / Landing Panel -->
+    <section id="uploadSection" class="upload-section">
+      <div class="intro-container text-center">
+        <h2>Advanced Resume Intelligence & Career Prediction</h2>
+        <p class="subtitle">Upload your resume to receive a comprehensive ATS evaluation, employability scores, custom roadmap, project feedback, and personalized interview simulations powered by ML concepts.</p>
+      </div>
+
+      <div class="upload-card glass">
+        <div id="dropzone" class="dropzone">
+          <input type="file" id="fileInput" accept=".pdf,.docx,.txt" style="display: none;">
+          <div class="dropzone-content">
+            <div class="upload-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            </div>
+            <h3>Drag & drop your resume</h3>
+            <p>PDF, DOCX, or TXT (Max 10MB)</p>
+            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">Browse Files</button>
+          </div>
+        </div>
+
+        <div id="fileInfo" class="file-info hidden">
+          <div class="file-meta">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <div>
+              <p id="fileName" class="file-name">resume.pdf</p>
+              <p id="fileSize" class="file-size">1.2 MB</p>
+            </div>
+          </div>
+          <button id="btnRemoveFile" class="btn-icon" aria-label="Remove File">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div class="action-buttons-group">
+          <button id="btnAnalyze" class="btn btn-accent flex-btn hidden" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Run Intelligence Analysis
+          </button>
+          <button id="btnDemo" class="btn btn-secondary flex-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            Load Interactive Demo Data
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Dashboard (Visible post-analysis) -->
+    <section id="dashboardSection" class="dashboard-section hidden">
+      <!-- Top Overview Stats -->
+      <div class="overview-header glass">
+        <div class="candidate-meta">
+          <h2 id="summaryCandidateName">John Doe</h2>
+          <p id="summaryTargetRole">Target Role: Software Engineer / AI-ML Specialist</p>
+        </div>
+        <div class="verdict-summary-badge" id="summaryVerdictBadge">
+          Shortlist
+        </div>
+        <button id="btnReset" class="btn btn-secondary flex-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          Analyze Another Resume
+        </button>
+      </div>
+
+      <div class="dashboard-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="dashboard-sidebar glass">
+          <nav class="sidebar-nav">
+            <button class="nav-item active" data-target="p1_profile">
+              <span class="nav-number">01</span> Candidate Profile
+            </button>
+            <button class="nav-item" data-target="p2_ats">
+              <span class="nav-number">02</span> ATS Assessment
+            </button>
+            <button class="nav-item" data-target="p3_employability">
+              <span class="nav-number">03</span> Employability Gauges
+            </button>
+            <button class="nav-item" data-target="p4_skillgap">
+              <span class="nav-number">04</span> Skill Gap Roadmap
+            </button>
+            <button class="nav-item" data-target="p5_projectintel">
+              <span class="nav-number">05</span> Project Audit
+            </button>
+            <button class="nav-item" data-target="p6_interview">
+              <span class="nav-number">06</span> Domain Readiness
+            </button>
+            <button class="nav-item" data-target="p7_questions">
+              <span class="nav-number">07</span> Mock Interview QA
+            </button>
+            <button class="nav-item" data-target="p8_careertwin">
+              <span class="nav-number">08</span> Digital Career Twin
+            </button>
+            <button class="nav-item" data-target="p9_optimization">
+              <span class="nav-number">09</span> Optimized Bullet Points
+            </button>
+            <button class="nav-item" data-target="p10_roadmap">
+              <span class="nav-number">10</span> Improvement Timeline
+            </button>
+            <button class="nav-item" data-target="p11_verdict">
+              <span class="nav-number">11</span> Recruiter's Final Verdict
+            </button>
+          </nav>
+        </aside>
+
+        <!-- Main Display Panel -->
+        <div class="dashboard-display">
+          
+          <!-- Phase 1: Resume Understanding -->
+          <div id="p1_profile" class="dashboard-tab-content active glass">
+            <h2>Phase 1: Structured Candidate Profile</h2>
+            <div class="profile-grid">
+              <div class="profile-card">
+                <h3>Contact & Education</h3>
+                <div id="profileEducation" class="content-list"></div>
+              </div>
+              <div class="profile-card">
+                <h3>Technical Summary</h3>
+                <div class="tech-tag-group">
+                  <h4>Programming Languages</h4>
+                  <div id="tagsLanguages" class="tag-container"></div>
+                </div>
+                <div class="tech-tag-group">
+                  <h4>Frameworks</h4>
+                  <div id="tagsFrameworks" class="tag-container"></div>
+                </div>
+                <div class="tech-tag-group">
+                  <h4>Tools & Technologies</h4>
+                  <div id="tagsTools" class="tag-container"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="profile-row-grid mt-4">
+              <div class="profile-card">
+                <h3>Certifications</h3>
+                <ul id="profileCertifications" class="bullet-list"></ul>
+              </div>
+              <div class="profile-card">
+                <h3>Coding Profiles & Leadership</h3>
+                <ul id="profileProfiles" class="bullet-list"></ul>
+              </div>
+            </div>
+
+            <div class="profile-card mt-4">
+              <h3>Experience & Internships</h3>
+              <div id="profileInternships" class="timeline-container"></div>
+            </div>
+          </div>
+
+          <!-- Phase 2: ATS Analysis -->
+          <div id="p2_ats" class="dashboard-tab-content glass">
+            <h2>Phase 2: ATS & Recruiter Appeal Analysis</h2>
+            <div class="score-card-grid">
+              <div class="circle-chart-card">
+                <div class="progress-ring-container">
+                  <svg class="progress-ring" width="160" height="160">
+                    <circle class="progress-ring__circle-bg" stroke="#1d1b26" stroke-width="12" fill="transparent" r="70" cx="80" cy="80"/>
+                    <circle id="atsCircleProgress" class="progress-ring__circle" stroke="var(--color-primary)" stroke-width="12" fill="transparent" r="70" cx="80" cy="80"/>
+                  </svg>
+                  <div class="progress-ring-text">
+                    <span id="atsScoreValue" class="score-value">85</span>
+                    <span class="score-label">ATS Score</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="sub-score-container">
+                <div class="sub-score-item">
+                  <div class="sub-score-meta">
+                    <span>Keyword Optimization</span>
+                    <span id="scoreKeyword">80%</span>
+                  </div>
+                  <div class="progress-bar-bg"><div id="barKeyword" class="progress-bar-fill fill-primary"></div></div>
+                </div>
+                <div class="sub-score-item">
+                  <div class="sub-score-meta">
+                    <span>Formatting Precision</span>
+                    <span id="scoreFormatting">90%</span>
+                  </div>
+                  <div class="progress-bar-bg"><div id="barFormatting" class="progress-bar-fill fill-secondary"></div></div>
+                </div>
+                <div class="sub-score-item">
+                  <div class="sub-score-meta">
+                    <span>Readability Metric</span>
+                    <span id="scoreReadability">75%</span>
+                  </div>
+                  <div class="progress-bar-bg"><div id="barReadability" class="progress-bar-fill fill-accent"></div></div>
+                </div>
+                <div class="sub-score-item">
+                  <div class="sub-score-meta">
+                    <span>Recruiter First-Impression</span>
+                    <span id="scoreAppeal">82%</span>
+                  </div>
+                  <div class="progress-bar-bg"><div id="barAppeal" class="progress-bar-fill fill-gold"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ats-findings-grid mt-4">
+              <div class="findings-card weak">
+                <h3 class="card-icon-title text-red">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Missing Industry Keywords
+                </h3>
+                <ul id="atsMissingKeywords" class="bullet-list-findings"></ul>
+              </div>
+              <div class="findings-card warn">
+                <h3 class="card-icon-title text-yellow">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  Weak & Unnecessary Sections
+                </h3>
+                <ul id="atsWeakSections" class="bullet-list-findings"></ul>
+              </div>
+            </div>
+
+            <div class="findings-card info mt-4">
+              <h3 class="card-icon-title text-blue">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                Formatting Alerts & Optimization Strategy
+              </h3>
+              <ul id="atsFormattingProblems" class="bullet-list-findings"></ul>
+              <div class="alert-separator"></div>
+              <h4>Recommendations:</h4>
+              <ul id="atsRecommendations" class="bullet-list-findings"></ul>
+            </div>
+          </div>
+
+          <!-- Phase 3: Employability Prediction -->
+          <div id="p3_employability" class="dashboard-tab-content glass">
+            <h2>Phase 3: Employability & Role Fit Gauges</h2>
+            <div class="employability-grid" id="employabilityGrid">
+              <!-- Rendered Dynamically -->
+            </div>
+          </div>
+
+          <!-- Phase 4: Skill Gap Detection -->
+          <div id="p4_skillgap" class="dashboard-tab-content glass">
+            <h2>Phase 4: Target Role Skill Gap Audit</h2>
+            <div class="role-header-card">
+              <h3>Target Role: <span id="targetRoleName" class="text-accent">Data Scientist / ML Engineer</span></h3>
+            </div>
+
+            <div class="skill-audit-grid">
+              <div class="audit-card matches">
+                <h3 class="text-green">Match Skills</h3>
+                <div id="currentSkillsContainer" class="tag-container mt-2"></div>
+              </div>
+              
+              <div class="audit-card missing">
+                <h3 class="text-red">Missing Critical Skills</h3>
+                <div id="criticalSkillsContainer" class="tag-container mt-2"></div>
+              </div>
+
+              <div class="audit-card recommended">
+                <h3 class="text-blue">Recommended Skills</h3>
+                <div id="recommendedSkillsContainer" class="tag-container mt-2"></div>
+              </div>
+            </div>
+
+            <div class="roadmap-card mt-4">
+              <h3>Custom Skill Upskilling Roadmap</h3>
+              
+              <div class="roadmap-stages">
+                <div class="roadmap-stage">
+                  <div class="stage-badge beginner">Beginner Stage</div>
+                  <ul id="roadmapBeginner" class="roadmap-items"></ul>
+                </div>
+                <div class="roadmap-stage">
+                  <div class="stage-badge intermediate">Intermediate Stage</div>
+                  <ul id="roadmapIntermediate" class="roadmap-items"></ul>
+                </div>
+                <div class="roadmap-stage">
+                  <div class="stage-badge advanced">Advanced Stage</div>
+                  <ul id="roadmapAdvanced" class="roadmap-items"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phase 5: Project Intelligence -->
+          <div id="p5_projectintel" class="dashboard-tab-content glass">
+            <h2>Phase 5: Technical Project Audit</h2>
+            <p class="subtitle mb-4">Every project evaluated based on Complexity, Innovation, Industry Relevance, and Recruiter Impact.</p>
+            
+            <div id="projectAuditList" class="accordion-container">
+              <!-- Dynamic Accordions -->
+            </div>
+          </div>
+
+          <!-- Phase 6: Interview Readiness -->
+          <div id="p6_interview" class="dashboard-tab-content glass">
+            <h2>Phase 6: Core Computer Science & Domain Readiness</h2>
+            <div class="interview-readiness-layout">
+              <div class="chart-container-large">
+                <canvas id="radarChart"></canvas>
+              </div>
+              <div class="strengths-weaknesses-card">
+                <div class="sw-section match-card">
+                  <h3 class="text-green flex-align">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Strength Areas
+                  </h3>
+                  <ul id="interviewStrengths" class="bullet-list-findings"></ul>
+                </div>
+                <div class="sw-section miss-card mt-4">
+                  <h3 class="text-red flex-align">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    Weak Areas (Priority Review)
+                  </h3>
+                  <ul id="interviewWeaknesses" class="bullet-list-findings"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phase 7: Interview Question Generation -->
+          <div id="p7_questions" class="dashboard-tab-content glass">
+            <h2>Phase 7: Customized Mock Interview QA Simulator</h2>
+            <p class="subtitle mb-4">Personalized technical and project-related questions generated based on your technology stack.</p>
+            
+            <div class="qa-filter-tabs">
+              <button class="qa-tab active" data-type="general">General Tech Qs</button>
+              <button class="qa-tab" data-type="project">Project-Based Qs</button>
+            </div>
+
+            <div id="qaContainer" class="qa-list-container">
+              <!-- Dynamically Populated Questions -->
+            </div>
+          </div>
+
+          <!-- Phase 8: Career Twin Analysis -->
+          <div id="p8_careertwin" class="dashboard-tab-content glass">
+            <h2>Phase 8: Digital Career Twin & Market Comparison</h2>
+            
+            <div class="twin-grid">
+              <div class="chart-container-large">
+                <canvas id="twinChart"></canvas>
+              </div>
+
+              <div class="twin-details">
+                <div class="twin-category-card">
+                  <span class="category-pre">Candidate Standing Category</span>
+                  <h3 id="twinCategoryName">Competitive Candidate</h3>
+                  <p id="twinMarketStanding">Your resume scores higher than 72% of average peers in B.Tech applications.</p>
+                </div>
+                
+                <div class="twin-explanation mt-4">
+                  <h4>Market Competitiveness Breakdown</h4>
+                  <p id="twinExplanationText"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phase 9: Resume Optimization -->
+          <div id="p9_optimization" class="dashboard-tab-content glass">
+            <h2>Phase 9: AI Resume Text Optimization</h2>
+            <p class="subtitle mb-4">Rewrite weaker sections with action verbs, tech integration, and quantified business impact metrics.</p>
+            
+            <div id="optimizationList" class="opt-cards-container">
+              <!-- Dynamically Populated Side by Side cards -->
+            </div>
+          </div>
+
+          <!-- Phase 10: Personalized Roadmap -->
+          <div id="p10_roadmap" class="dashboard-tab-content glass">
+            <h2>Phase 10: Structured Improvement Roadmap</h2>
+            
+            <div class="roadmap-timeline-nav">
+              <button class="timeline-tab active" data-time="30">30-Day Sprint</button>
+              <button class="timeline-tab" data-time="90">90-Day Push</button>
+              <button class="timeline-tab" data-time="180">6-Month Vision</button>
+            </div>
+
+            <div id="roadmapTimelineDetails" class="roadmap-timeline-content mt-4">
+              <!-- Dynamic Details -->
+            </div>
+          </div>
+
+          <!-- Phase 11: Final Verdict -->
+          <div id="p11_verdict" class="dashboard-tab-content glass">
+            <h2>Phase 11: Senior Recruiter Brutally Honest Verdict</h2>
+            
+            <div class="verdict-grid">
+              <div class="verdict-score-column">
+                <div class="verdict-circle-wrapper">
+                  <div class="verdict-circle-display">
+                    <span id="verdictOverallScore">78</span>
+                    <span class="verdict-circle-lbl">Overall Score</span>
+                  </div>
+                </div>
+                
+                <div class="verdict-rec-badge shortlist" id="verdictRecommendation">
+                  Shortlist
+                </div>
+              </div>
+
+              <div class="verdict-breakdown-column">
+                <h3>System Evaluation Scores</h3>
+                
+                <div class="verdict-progress-item">
+                  <div class="verdict-progress-lbl"><span>ATS Score</span><span id="vScoreAts">75/100</span></div>
+                  <div class="progress-bar-bg"><div id="vBarAts" class="progress-bar-fill fill-primary"></div></div>
+                </div>
+
+                <div class="verdict-progress-item">
+                  <div class="verdict-progress-lbl"><span>Employability Fit</span><span id="vScoreEmp">80/100</span></div>
+                  <div class="progress-bar-bg"><div id="vBarEmp" class="progress-bar-fill fill-secondary"></div></div>
+                </div>
+
+                <div class="verdict-progress-item">
+                  <div class="verdict-progress-lbl"><span>Technical Skill Depth</span><span id="vScoreTech">82/100</span></div>
+                  <div class="progress-bar-bg"><div id="vBarTech" class="progress-bar-fill fill-accent"></div></div>
+                </div>
+
+                <div class="verdict-progress-item">
+                  <div class="verdict-progress-lbl"><span>Project Rigor & Quality</span><span id="vScoreProj">68/100</span></div>
+                  <div class="progress-bar-bg"><div id="vBarProj" class="progress-bar-fill fill-gold"></div></div>
+                </div>
+
+                <div class="verdict-progress-item">
+                  <div class="verdict-progress-lbl"><span>Interview Performance Estimate</span><span id="vScoreInt">70/100</span></div>
+                  <div class="progress-bar-bg"><div id="vBarInt" class="progress-bar-fill fill-blue"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="feedback-card mt-4">
+              <h3 class="feedback-title flex-align">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Brutally Honest Feedback (Top-Tech Recruiter Review)
+              </h3>
+              <p id="verdictHonestFeedback" class="feedback-text"></p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal">
+    <div class="modal-content glass">
+      <div class="modal-header">
+        <h2>API Settings Configuration</h2>
+        <button id="btnCloseSettings" class="btn-icon" aria-label="Close Settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">To process your resume text, please configure your Google Gemini API Key. It is saved locally in your browser's local storage and is never sent to external servers other than the LLM endpoint.</p>
+        <div class="input-group">
+          <label for="apiKeyInput">Gemini API Key</label>
+          <input type="password" id="apiKeyInput" placeholder="AIzaSy..." class="styled-input">
+        </div>
+        <div class="input-actions">
+          <button id="btnSaveSettings" class="btn btn-accent">Save Configurations</button>
+          <button id="btnDeleteSettings" class="btn btn-secondary text-red">Clear Key</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading / Analysis Overlay -->
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loading-card glass text-center">
+      <div class="spinner">
+        <div class="double-bounce1"></div>
+        <div class="double-bounce2"></div>
+      </div>
+      <h2>Analyzing Resume...</h2>
+      <p id="loadingStatusText">Extracting structured elements & scoring keywords...</p>
+      
+      <!-- Interactive Processing Log -->
+      <div class="processing-log" id="processingLog">
+        <div class="log-line success">✓ File upload complete</div>
+        <div class="log-line success">✓ Text extracted from resume format</div>
+        <div class="log-line active" id="currentLogStep">Generating CareerMind AI profile...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Footer -->
+  <footer class="app-footer">
+    <p>© 2026 CareerMind AI. Built for Resume Intelligence & Career Analysis.</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/mockData.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
