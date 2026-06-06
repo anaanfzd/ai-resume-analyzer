@@ -360,7 +360,8 @@ ${JSON_RESPONSE_SCHEMA}
         const model = genAI.getGenerativeModel({ 
           model: modelName,
           generationConfig: {
-            responseMimeType: "application/json"
+            responseMimeType: "application/json",
+            maxOutputTokens: 8192
           }
         });
 
@@ -380,15 +381,28 @@ ${JSON_RESPONSE_SCHEMA}
 
     const responseText = result.response.text();
     
-    // Parse response
+    // Parse response with robust cleaning
     let jsonResult;
     try {
-      jsonResult = JSON.parse(responseText);
-    } catch (jsonErr) {
-      console.error("JSON parsing error from LLM response:", responseText);
-      // Attempt to clean JSON (sometimes models still put ```json wrappers)
-      const cleanText = responseText.replace(/```json|```/g, '').trim();
+      // 1. Remove any potential markdown code block wrappers
+      let cleanText = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();
       jsonResult = JSON.parse(cleanText);
+    } catch (jsonErr) {
+      console.error("Standard JSON parsing failed. Attempting cleanup...", jsonErr);
+      
+      try {
+        let repairedText = responseText
+          .replace(/```json/gi, '')
+          .replace(/```/g, '')
+          .trim()
+          .replace(/,\s*([\]}])/g, '$1') // remove trailing commas before closing braces/brackets
+          .replace(/[\u0000-\u001F]+/g, ' '); // remove raw non-printable control characters
+          
+        jsonResult = JSON.parse(repairedText);
+      } catch (secondErr) {
+        console.error("JSON parsing error from LLM response:", responseText);
+        throw new Error(`Invalid JSON format returned by the AI: ${secondErr.message}`);
+      }
     }
 
     return res.json(jsonResult);
