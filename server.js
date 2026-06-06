@@ -298,7 +298,14 @@ app.post('/api/analyze', upload.single('resume'), async (req, res) => {
     }
 
     // Retrieve API key from Header, Body or fallback to Environment Variable
-    const apiKey = req.headers['x-api-key'] || req.body.apiKey || process.env.GEMINI_API_KEY;
+    let apiKey = req.headers['x-api-key'] || req.body.apiKey || process.env.GEMINI_API_KEY;
+    if (apiKey) {
+      apiKey = apiKey.trim();
+    }
+    if (!apiKey || apiKey === 'undefined' || apiKey === 'null' || apiKey === '') {
+      apiKey = process.env.GEMINI_API_KEY;
+    }
+
     if (!apiKey) {
       return res.status(400).json({ 
         error: 'Gemini API Key is missing. Please configure it in Settings.' 

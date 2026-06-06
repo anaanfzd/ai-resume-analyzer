@@ -182,12 +182,6 @@ btnDemo.addEventListener('click', () => {
 
 btnAnalyze.addEventListener('click', async () => {
   if (!selectedFile) return;
-  
-  if (!currentApiKey) {
-    alert('Gemini API Key is required. Opening API configuration...');
-    settingsModal.classList.add('open');
-    return;
-  }
 
   // Show Loading Screen
   loadingOverlay.classList.remove('hidden');
@@ -196,7 +190,9 @@ btnAnalyze.addEventListener('click', async () => {
   const formData = new FormData();
   formData.append('resume', selectedFile);
   formData.append('model', document.getElementById('modelSelect').value);
-  formData.append('apiKey', currentApiKey);
+  if (currentApiKey) {
+    formData.append('apiKey', currentApiKey);
+  }
 
   try {
     updateLog('Uploading resume file...', 'active');
@@ -209,12 +205,15 @@ btnAnalyze.addEventListener('click', async () => {
 
     updateLog('Contacting CareerMind AI Engine (Gemini)...', 'active');
     
+    const headers = {};
+    if (currentApiKey) {
+      headers['x-api-key'] = currentApiKey;
+    }
+
     const response = await fetch('/api/analyze', {
       method: 'POST',
       body: formData,
-      headers: {
-        'x-api-key': currentApiKey
-      }
+      headers: headers
     });
 
     if (!response.ok) {
@@ -258,6 +257,11 @@ btnAnalyze.addEventListener('click', async () => {
   } catch (error) {
     alert(`Analysis failed: ${error.message}`);
     loadingOverlay.classList.add('hidden');
+    
+    // Automatically open settings if API key is missing
+    if (error.message.includes('API Key is missing') || error.message.includes('API key is missing') || error.message.includes('Unauthorized') || error.message.includes('invalid authentication credentials')) {
+      settingsModal.classList.add('open');
+    }
   }
 });
 
