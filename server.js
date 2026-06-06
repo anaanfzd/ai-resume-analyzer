@@ -303,18 +303,23 @@ app.post('/api/analyze', upload.single('resume'), async (req, res) => {
     // 1. Check if user provided an API key from frontend
     let userKey = req.headers['x-api-key'] || req.body.apiKey;
     if (userKey) {
-      userKey = userKey.trim();
+      userKey = userKey.trim().replace(/^["']|["']$/g, '');
       if (userKey && userKey !== 'undefined' && userKey !== 'null' && userKey !== '') {
         keysToTry.push(userKey);
       }
     }
     
-    // 2. Fall back to environment keys (can be comma-separated list)
-    if (keysToTry.length === 0) {
-      const envKeys = process.env.GEMINI_API_KEY || '';
-      keysToTry = envKeys.split(',')
-        .map(key => key.trim())
-        .filter(key => key && key !== 'undefined' && key !== 'null' && key !== '');
+    // 2. Parse environment keys (can be comma-separated list)
+    const envKeys = process.env.GEMINI_API_KEY || '';
+    const serverKeys = envKeys.split(',')
+      .map(key => key.trim().replace(/^["']|["']$/g, '')) // strip surrounding quotes
+      .filter(key => key && key !== 'undefined' && key !== 'null' && key !== '');
+
+    // Add server keys to the list (avoiding duplicates)
+    for (const key of serverKeys) {
+      if (!keysToTry.includes(key)) {
+        keysToTry.push(key);
+      }
     }
 
     if (keysToTry.length === 0) {
