@@ -218,11 +218,29 @@ btnAnalyze.addEventListener('click', async () => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Server returned an error');
+      let errorMessage = 'Server returned an error';
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+      } else {
+        const responseText = await response.text();
+        if (responseText.includes('<!DOCTYPE') || responseText.includes('<html>')) {
+          errorMessage = `Server Error (${response.status}): The server returned an HTML error page. Please wait a moment for the server to finish building or check the Render logs.`;
+        } else {
+          errorMessage = responseText || `HTTP error! status: ${response.status}`;
+        }
+      }
+      throw new Error(errorMessage);
     }
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (parseError) {
+      console.error("Failed to parse response JSON:", parseError);
+      throw new Error("Failed to parse the server response as valid JSON data. The server might have returned a malformed response.");
+    }
     updateLog('✓ Gemini AI processing finished', 'success');
 
     updateLog('Compiling predictive data models...', 'active');
