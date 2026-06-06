@@ -297,16 +297,27 @@ app.post('/api/analyze', upload.single('resume'), async (req, res) => {
       return res.status(400).json({ error: 'No resume file uploaded.' });
     }
 
-    // Retrieve API key from Header, Body or fallback to Environment Variable
-    let apiKey = req.headers['x-api-key'] || req.body.apiKey || process.env.GEMINI_API_KEY;
-    if (apiKey) {
-      apiKey = apiKey.trim();
+    // Retrieve and parse API keys
+    let keysToTry = [];
+    
+    // 1. Check if user provided an API key from frontend
+    let userKey = req.headers['x-api-key'] || req.body.apiKey;
+    if (userKey) {
+      userKey = userKey.trim();
+      if (userKey && userKey !== 'undefined' && userKey !== 'null' && userKey !== '') {
+        keysToTry.push(userKey);
+      }
     }
-    if (!apiKey || apiKey === 'undefined' || apiKey === 'null' || apiKey === '') {
-      apiKey = process.env.GEMINI_API_KEY;
+    
+    // 2. Fall back to environment keys (can be comma-separated list)
+    if (keysToTry.length === 0) {
+      const envKeys = process.env.GEMINI_API_KEY || '';
+      keysToTry = envKeys.split(',')
+        .map(key => key.trim())
+        .filter(key => key && key !== 'undefined' && key !== 'null' && key !== '');
     }
 
-    if (!apiKey) {
+    if (keysToTry.length === 0) {
       return res.status(400).json({ 
         error: 'Gemini API Key is missing. Please configure it in Settings.' 
       });
@@ -333,8 +344,7 @@ app.post('/api/analyze', upload.single('resume'), async (req, res) => {
     const requestedModel = req.body.model || 'gemini-3.5-flash';
     console.log(`Analyzing resume with model: ${requestedModel}`);
 
-    // Call Gemini API with automatic model fallbacks if service is busy
-    const genAI = new GoogleGenerativeAI(apiKey);
+    // Call Gemini API with automatic model fallbacks and key rotation if service is busy
     let result;
     let success = false;
     let lastError = null;
@@ -362,28 +372,42 @@ ${JSON_RESPONSE_SCHEMA}
 `;
 
     for (const modelName of modelQueue) {
-      try {
-        console.log(`Sending prompt to model: ${modelName}`);
-        const model = genAI.getGenerativeModel({ 
-          model: modelName,
-          generationConfig: {
-            responseMimeType: "application/json",
-            maxOutputTokens: 8192
-          }
-        });
+      for (const apiKeyToUse of keysToTry) {
+        try {
+          const maskedKey = apiKeyToUse.length > 8 
+            ? `${apiKeyToUse.slice(0, 4)}...${apiKeyToUse.slice(-4)}` 
+            : '***';
+          console.log(`Sending prompt using key (${maskedKey}) to model: ${modelName}`);
+          
+          const genAI = new GoogleGenerativeAI(apiKeyToUse);
+          const model = genAI.getGenerativeModel({ 
+            model: modelName,
+            generationConfig: {
+              responseMimeType: "application/json",
+              maxOutputTokens: 8192
+            }
+          });
 
-        result = await model.generateContent(prompt);
-        success = true;
-        console.log(`Success utilizing model: ${modelName}`);
-        break;
-      } catch (err) {
-        console.warn(`Model ${modelName} failed. Error: ${err.message}`);
-        lastError = err;
+          result = await model.generateContent(prompt);
+          success = true;
+          console.log(`Success utilizing model: ${modelName} with key (${maskedKey})`);
+          break; // Break the keys loop
+        } catch (err) {
+          const maskedKey = apiKeyToUse.length > 8 
+            ? `${apiKeyToUse.slice(0, 4)}...${apiKeyToUse.slice(-4)}` 
+            : '***';
+          console.warn(`Model ${modelName} failed with key (${maskedKey}). Error: ${err.message}`);
+          lastError = err;
+          // Continue to next key
+        }
+      }
+      if (success) {
+        break; // Break the models loop
       }
     }
 
     if (!success) {
-      throw lastError || new Error('All configured Gemini models failed to process request.');
+      throw lastError || new Error('All configured Gemini models and API keys failed to process request.');
     }
 
     const responseText = result.response.text();
